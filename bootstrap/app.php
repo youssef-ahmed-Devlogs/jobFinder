@@ -12,10 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::middleware('web')
-                ->prefix('dashboard')
-                ->as('dashboard.')
-                ->group(base_path('routes/web.php'));
+            // Route::middleware('web')
+            // ->prefix('dashboard')
+            // ->as('dashboard.')
+            //     ->group(base_path('routes/web.php'));
 
             Route::middleware('web')
                 ->prefix('applicant')
@@ -33,7 +33,25 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->redirectTo(function () {
+            dd('asdsd');
+        });
+
         $middleware->redirectGuestsTo(function (Request $request) {
+
+            if (auth()->guard('web')->check()) {
+                return route('dashboard.index');
+            }
+
+            if (auth()->guard('company')->check()) {
+                return route('company.index');
+            }
+
+            if (auth()->guard('applicant')->check()) {
+                return route('applicant.index');
+            }
+
             $isAdmin = $request->is('dashboard') || $request->is('dashboard/*') || $request->is('*/dashboard') || $request->is('*/dashboard/*');
             $isApplicant = $request->is('applicant') || $request->is('applicant/*') || $request->is('*/applicant') || $request->is('*/applicant/*');
             $isCompany = $request->is('company') || $request->is('company/*') || $request->is('*/company') || $request->is('*/company/*');

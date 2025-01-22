@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Applicant;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -31,20 +33,32 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'guard' => ['required', 'string', 'in:applicant,company'],
         ]);
 
-        $user = User::create([
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-        ]);
+        ];
 
-        event(new Registered($user));
+        $user = null;
+        $guard = $request->guard;
 
-        Auth::login($user);
+        if ($guard == 'company') {
+            $user = Company::create($data);
+        }
 
-        return redirect(route('dashboard', absolute: false));
+        if ($guard == 'applicant') {
+            $user = Applicant::create($data);
+        }
+
+        // event(new Registered($user));
+
+        Auth::guard($guard)->login($user);
+
+        return redirect(route("{$guard}.index", absolute: false));
     }
 }
