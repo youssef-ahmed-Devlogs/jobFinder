@@ -33,11 +33,6 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
-
-        $middleware->redirectTo(function () {
-            dd('asdsd');
-        });
-
         $middleware->redirectGuestsTo(function (Request $request) {
 
             if (auth()->guard('web')->check()) {
