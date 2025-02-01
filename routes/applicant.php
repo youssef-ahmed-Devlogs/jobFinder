@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', function () {
+    // auth()->guard('applicant')->logout();
     return 'Applicant Dashboard';
 })->middleware(['auth:applicant', 'verified'])->name('index');
 
